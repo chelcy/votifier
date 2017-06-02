@@ -23,14 +23,16 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 import com.vexsoftware.votifier.crypto.RSAIO;
 import com.vexsoftware.votifier.crypto.RSAKeygen;
 import com.vexsoftware.votifier.model.ListenerLoader;
 import com.vexsoftware.votifier.model.VoteListener;
 import com.vexsoftware.votifier.net.VoteReceiver;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.config.ConfigurationProvider;
+import net.md_5.bungee.config.YamlConfiguration;
 
 /**
  * The main Votifier plugin class.
@@ -38,7 +40,7 @@ import com.vexsoftware.votifier.net.VoteReceiver;
  * @author Blake Beaupain
  * @author Kramer Campbell
  */
-public class Votifier extends JavaPlugin {
+public class Votifier extends Plugin {
 
 	/** The logger instance. */
 	private static final Logger LOG = Logger.getLogger("Votifier");
@@ -53,7 +55,7 @@ public class Votifier extends JavaPlugin {
 	private String version;
 
 	/** The vote listeners. */
-	private final List<VoteListener> listeners = new ArrayList<VoteListener>();
+	private final List<VoteListener> listeners = new ArrayList<>();
 
 	/** The vote receiver. */
 	private VoteReceiver voteReceiver;
@@ -69,6 +71,7 @@ public class Votifier extends JavaPlugin {
 	 */
 	static {
 		LOG.setFilter(new LogFilter(logPrefix));
+		LOG.setParent(ProxyServer.getInstance().getLogger());
 	}
 
 	@Override
@@ -83,7 +86,7 @@ public class Votifier extends JavaPlugin {
 			getDataFolder().mkdir();
 		}
 		File config = new File(getDataFolder() + "/config.yml");
-		YamlConfiguration cfg = YamlConfiguration.loadConfiguration(config);
+		Configuration cfg = null;
 		File rsaDirectory = new File(getDataFolder() + "/rsa");
 		// Replace to remove a bug with Windows paths - SmilingDevil
 		String listenerDirectory = getDataFolder().toString()
@@ -95,7 +98,7 @@ public class Votifier extends JavaPlugin {
 		 * likely will return the main server address instead of the address
 		 * assigned to the server.
 		 */
-		String hostAddr = Bukkit.getServer().getIp();
+		String hostAddr = ProxyServer.getInstance().getConfig().getListeners().iterator().next().getHost().getHostName();
 		if (hostAddr == null || hostAddr.length() == 0)
 			hostAddr = "0.0.0.0";
 
@@ -109,6 +112,8 @@ public class Votifier extends JavaPlugin {
 
 				// Initialize the configuration file.
 				config.createNewFile();
+
+				cfg = ConfigurationProvider.getProvider(YamlConfiguration.class).load(config);
 
 				cfg.set("host", hostAddr);
 				cfg.set("port", 8192);
@@ -126,7 +131,7 @@ public class Votifier extends JavaPlugin {
 				LOG.info("------------------------------------------------------------------------------");
 
 				cfg.set("listener_folder", listenerDirectory);
-				cfg.save(config);
+				ConfigurationProvider.getProvider(YamlConfiguration.class).save(cfg, config);
 			} catch (Exception ex) {
 				LOG.log(Level.SEVERE, "Error creating configuration file", ex);
 				gracefulExit();
@@ -134,7 +139,11 @@ public class Votifier extends JavaPlugin {
 			}
 		} else {
 			// Load configuration.
-			cfg = YamlConfiguration.loadConfiguration(config);
+			try {
+				cfg = ConfigurationProvider.getProvider(YamlConfiguration.class).load(config);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		/*
@@ -172,7 +181,7 @@ public class Votifier extends JavaPlugin {
 			voteReceiver = new VoteReceiver(this, host, port);
 			voteReceiver.start();
 
-			LOG.info("Votifier enabled.");
+			LOG.info("Votifier enabled. Listen on " + host + ":" + port);
 		} catch (Exception ex) {
 			gracefulExit();
 			return;

@@ -3,27 +3,28 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.vexsoftware</groupId>
     <artifactId>votifier</artifactId>
-    <version>1.9</version>
+    <version>1.9-bungee</version>
     <name>Votifier</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <repositories>
+        <!-- BungeeCord -->
         <repository>
-            <id>bukkit</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
+            <id>bungeecord-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
     
     <dependencies>
-        <!-- Bukkit Dependency -->
+        <!-- BungeeCord -->
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.7.9-R0.2</version>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-api</artifactId>
+            <version>1.12-SNAPSHOT</version>
             <type>jar</type>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -36,8 +37,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <!-- Jar Plugin -->

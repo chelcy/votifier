@@ -1,6 +1,6 @@
 package com.vexsoftware.votifier.model;
 
-import org.bukkit.event.*;
+import net.md_5.bungee.api.plugin.Event;
 
 /**
  * {@code VotifierEvent} is a custom Bukkit event class that is sent
@@ -11,10 +11,6 @@ import org.bukkit.event.*;
  * 
  */
 public class VotifierEvent extends Event {
-	/**
-	 * Event listener handler list.
-	 */
-	private static final HandlerList handlers = new HandlerList();
 
 	/**
 	 * Encapsulated vote record.
@@ -40,12 +36,4 @@ public class VotifierEvent extends Event {
 		return vote;
 	}
 
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
-
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
 }
